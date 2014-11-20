@@ -209,6 +209,7 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35.2.6 2003/12/17 16:34:40 oe
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 
 #ifdef _WIN32
 
@@ -262,6 +263,7 @@ const char jbsockets_rcs[] = "$Id: jbsockets.c,v 1.35.2.6 2003/12/17 16:34:40 oe
 const char jbsockets_h_rcs[] = JBSOCKETS_H_VERSION;
 
 
+
 /*********************************************************************
  *
  * Function    :  connect_to
@@ -281,10 +283,20 @@ const char jbsockets_h_rcs[] = JBSOCKETS_H_VERSION;
  *********************************************************************/
 jb_socket connect_to(const char *host, int portnum, struct client_state *csp)
 {
+
+	log_error(LOG_LEVEL_GPC, "in connect");
    struct sockaddr_in inaddr;
    jb_socket fd;
    int addr;
-   fd_set wfds;
+   int epollfd;
+   
+   
+ //  fd_set wfds;
+
+struct epoll_event ev;
+struct epoll_event events[1024];
+   
+   
    struct timeval tv[1];
 #if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA)
    int   flags;
@@ -302,6 +314,11 @@ jb_socket connect_to(const char *host, int portnum, struct client_state *csp)
       return(JB_INVALID_SOCKET);
    }
 
+   
+   
+log_error(LOG_LEVEL_GPC, "host == %s  port == %d", host, portnum);
+   
+   
 #ifdef FEATURE_ACL
    dst->addr = ntohl((unsigned long) addr);
    dst->port = portnum;
@@ -330,7 +347,7 @@ jb_socket connect_to(const char *host, int portnum, struct client_state *csp)
 #ifndef _WIN32
    else
    {
-      inaddr.sin_port = htonl((unsigned long)portnum);
+      inaddr.sin_port = htonl((unsigned long)portnum);  
    }
 #endif /* ndef _WIN32 */
 
@@ -353,10 +370,14 @@ jb_socket connect_to(const char *host, int portnum, struct client_state *csp)
 #if !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__)
    if ((flags = fcntl(fd, F_GETFL, 0)) != -1)
    {
-      flags |= O_NDELAY;
+      flags |= O_NDELAY;      
       fcntl(fd, F_SETFL, flags);
-   }
+   }                          
 #endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__) */
+
+
+log_error(LOG_LEVEL_GPC, "fd == %d", fd);
+
 
    while (connect(fd, (struct sockaddr *) & inaddr, sizeof inaddr) == JB_INVALID_SOCKET)
    {
@@ -390,27 +411,50 @@ jb_socket connect_to(const char *host, int portnum, struct client_state *csp)
    }
 #endif /* !defined(_WIN32) && !defined(__BEOS__) && !defined(AMIGA) && !defined(__OS2__) */
 
+
+
+
+
+
    /* wait for connection to complete */
-   FD_ZERO(&wfds);
-   FD_SET(fd, &wfds);
+ //  FD_ZERO(&wfds);
+ //  FD_SET(fd, &wfds);
+ 
+
+ 
+epollfd = epoll_create(1024);
+ 
+ ev.data.fd = fd;
+ ev.events = EPOLLIN |EPOLLOUT;
+ int epollctl_value = epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
+ 
+ 
+ log_error(LOG_LEVEL_GPC, "epollctl_value == %d", epollctl_value);
+ 
+
 
    tv->tv_sec  = 30;
    tv->tv_usec = 0;
    
- 
-   log_error(LOG_LEVEL_GPC, "int connect() : before select");
-   
+
+
+
+
+log_error(LOG_LEVEL_GPC, "before epoll_wait epollfd == %d", epollfd);
+
+
 
    /* MS Windows uses int, not SOCKET, for the 1st arg of select(). Wierd! */
-   if (select((int)fd + 1, NULL, &wfds, NULL, NULL) <= 0)
+//   if (select((int)fd + 1, NULL, &wfds, NULL, tv) <= 0)
+	if( epoll_wait(epollfd, events, 1024, 30) <= 0)
    {
-      log_error(LOG_LEVEL_GPC, "in select");
+      log_error(LOG_LEVEL_GPC, "in epoll_wait epollfd == %d", epollfd);
       close_socket(fd);
       return(JB_INVALID_SOCKET);
    }
-   
-   log_error(LOG_LEVEL_GPC, "after select");
-   
+log_error(LOG_LEVEL_GPC, "after epoll_wait epollfd == %d", epollfd);
+
+log_error(LOG_LEVEL_GPC, "out connect");
    return(fd);
 
 }
@@ -518,7 +562,12 @@ int read_socket(jb_socket fd, char *buf, int len)
 #elif defined(__BEOS__) || defined(AMIGA) || defined(__OS2__)
    return(recv(fd, buf, (size_t)len, 0));
 #else
+
+{
+  log_error(LOG_LEVEL_GPC, "ubuntu  read_socket");
+
    return(read(fd, buf, (size_t)len));
+}
 #endif
 }
 

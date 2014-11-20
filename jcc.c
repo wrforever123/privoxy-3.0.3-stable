@@ -601,6 +601,7 @@ const char jcc_rcs[] = "$Id: jcc.c,v 1.92.2.14 2003/12/12 12:52:53 oes Exp $";
 #include <signal.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/epoll.h>
 
 #ifdef FEATURE_PTHREAD
 #include <pthread.h>
@@ -683,6 +684,8 @@ const char project_h_rcs[] = PROJECT_H_VERSION;
 int no_daemon = 0;
 struct client_state  clients[1];
 struct file_list     files[1];
+
+
 
 #ifdef FEATURE_STATISTICS
 int urls_read     = 0;     /* total nr of urls read inc rejected */
@@ -833,7 +836,18 @@ static void chat(struct client_state *csp)
    char *hdr;
    char *p;
    char *req;
-   fd_set rfds;
+   
+   
+ // fd_set rfds, allfds;
+ 
+ int  i, nready, epollfd;
+ struct epoll_event ev1, ev2, events[1024];
+ 
+ 
+ log_error(LOG_LEVEL_GPC, "in chat");
+
+ 
+ 
    int n;
    jb_socket maxfd;
    int server_body;
@@ -863,14 +877,9 @@ static void chat(struct client_state *csp)
     * could get blocked here if a client connected, then didn't say anything!
     */
 
-			 
-	
-	
    for (;;)
    {
       len = read_socket(csp->cfd, buf, sizeof(buf));
-	  
-	  log_error(LOG_LEVEL_GPC, "in chat read %d ", len);
 
       if (len <= 0) break;      /* error! */
       
@@ -1176,8 +1185,8 @@ static void chat(struct client_state *csp)
 
    list_remove_all(csp->headers);
 
-   log_error(LOG_LEVEL_GPC, "%s%s", http->hostport, http->path);
-
+   log_error(LOG_LEVEL_GPC, "%s%s 12345", http->hostport, http->path);
+ 
    if (fwd->forward_host)
    {
       log_error(LOG_LEVEL_CONNECT, "via %s:%d to: %s",
@@ -1188,9 +1197,19 @@ static void chat(struct client_state *csp)
       log_error(LOG_LEVEL_CONNECT, "to %s", http->hostport);
    }
 
+     
+   
+    log_error(LOG_LEVEL_GPC, "%s%s 1111", http->hostport, http->path);
+   
+   
    /* here we connect to the server, gateway, or the forwarder */
 
-   csp->sfd = forwarded_connect(fwd, http, csp);
+   
+  csp->sfd = forwarded_connect(fwd, http, csp);
+   
+log_error(LOG_LEVEL_GPC, "%s%s 22222", http->hostport, http->path);
+
+
 
    if (csp->sfd == JB_INVALID_SOCKET)
    {
@@ -1212,6 +1231,9 @@ static void chat(struct client_state *csp)
                    csp->ip_addr_str, http->ocmd);
       }
 
+log_error(LOG_LEVEL_GPC, "%s%s 333333", http->hostport, http->path);
+
+
 
       /* Write the answer to the client */
       if(rsp)
@@ -1225,10 +1247,16 @@ static void chat(struct client_state *csp)
 
       free_http_response(rsp);
       freez(hdr);
+	  
+	  log_error(LOG_LEVEL_GPC, "%s%s 4444", http->hostport, http->path);
+	  
       return;
    }
 
    log_error(LOG_LEVEL_CONNECT, "OK");
+   
+   
+
 
    if (fwd->forward_host || (http->ssl == 0))
    {
@@ -1290,51 +1318,91 @@ static void chat(struct client_state *csp)
 
    server_body = 0;
 
-   for (;;)
-   {
-#ifdef __OS2__
+   
+
+   
+	#ifdef __OS2__
       /*
        * FD_ZERO here seems to point to an errant macro which crashes.
        * So do this by hand for now...
        */
-      memset(&rfds,0x00,sizeof(fd_set));
+   //   memset(&rfds,0x00,sizeof(fd_set));
+	epollfd = epoll_create(1024);
 #else
-      FD_ZERO(&rfds);
+    //  FD_ZERO(&rfds);
+	  epollfd = epoll_create(1024);  //错误处理未完成
+	  
 #endif
-      FD_SET(csp->cfd, &rfds);
-      FD_SET(csp->sfd, &rfds);
-	  
-	  
-	  log_error(LOG_LEVEL_GPC, "in chat() : before select ");
-	  
-      n = select((int)maxfd+1, &rfds, NULL, NULL, NULL);
+	//FD_SET(csp->cfd, &rfds);
+   //   FD_SET(csp->sfd, &rfds);
+   ev1.data.fd = csp->cfd;
+   ev1.events = EPOLLIN |EPOLLOUT;
+   epoll_ctl(epollfd, EPOLL_CTL_ADD, csp->cfd, &ev1); //错误处理未完成
+   
+   ev2.data.fd = csp->sfd;
+   ev2.events = EPOLLOUT | EPOLLIN;
+   epoll_ctl(epollfd, EPOLL_CTL_ADD, csp->sfd, &ev2); //错误处理未完成
+   
+   
+   
+   log_error(LOG_LEVEL_GPC, "in chat  before for");
+   
+   
+   for (;;)
+   {
 
-      if (n < 0)
+//	  allfds = rfds;
+	  
+ //     n = select((int)maxfd+1, &allfds, NULL, NULL, NULL);
+ 
+		nready = epoll_wait(epollfd, events, 1024, -1); 
+		
+		 log_error(LOG_LEVEL_GPC, "after epoll_wait  %d ", nready);
+		
+
+      if (nready < 0)
       {
          log_error(LOG_LEVEL_ERROR, "select() failed!: %E");
          return;
       }
+	  else if(nready == 0)
+		continue;
 
       /* this is the body of the browser's request
        * just read it and write it.
        */
 
-      if (FD_ISSET(csp->cfd, &rfds))
+	   for(i = 0; i < nready; i++)
+	   {
+	   
+   //   if (FD_ISSET(csp->cfd, &allfds))
+	  if(events[i].data.fd == csp->cfd)
       {
+	  
+	  
+	   log_error(LOG_LEVEL_GPC,  "in  csp->cfd == %d ", csp->cfd);
+	   
+	    log_error(LOG_LEVEL_GPC,  "in  csp->cfd == %d ", sizeof(buf));
+		
+		
          len = read_socket(csp->cfd, buf, sizeof(buf));
-		 
 
-
+		log_error(LOG_LEVEL_GPC,  "event[%d]    len == %d", i, len);
+		
+		
          if (len <= 0)
          {
             break; /* "game over, man" */
          }
 
+		 
          if (write_socket(csp->sfd, buf, (size_t)len))
          {
             log_error(LOG_LEVEL_ERROR, "write to: %s failed: %E", http->host);
             return;
          }
+		 
+		 log_error(LOG_LEVEL_GPC,  "event[%d]    after write", i);
          continue;
       }
 
@@ -1344,9 +1412,16 @@ static void chat(struct client_state *csp)
        * FIXME: Does `hdr' really mean `host'? No.
        */
 
+	   
+	     log_error(LOG_LEVEL_GPC,  "middle   ");
+	   
 
-      if (FD_ISSET(csp->sfd, &rfds))
+ //     if (FD_ISSET(csp->sfd, &allfds))
+	  if(events[i].data.fd == csp->sfd)
       {
+	  
+	  log_error(LOG_LEVEL_GPC,  "in  event[%d] ", i);
+	  
          fflush( 0 );
          len = read_socket(csp->sfd, buf, sizeof(buf) - 1);
 
@@ -1689,11 +1764,20 @@ static void chat(struct client_state *csp)
          continue;
       }
 
-      return; /* huh? we should never get here */
+      }
+	  
+	   
+	 log_error(LOG_LEVEL_GPC, "after for  %d ", nready);
+	 
+	  
+	  return; /* huh? we should never get here */
    }
 
    log_error(LOG_LEVEL_CLF, "%s - - [%T] \"%s\" 200 %d",
              csp->ip_addr_str, http->ocmd, byte_count);
+			 
+			 
+
 }
 
 
