@@ -429,7 +429,7 @@ epollfd = epoll_create(1024);
  int epollctl_value = epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
  
  
- log_error(LOG_LEVEL_GPC, "epollctl_value == %d", epollctl_value);
+ log_error(LOG_LEVEL_GPC, "line: 432  epollctl_value == %d", epollctl_value);
  
 
 
@@ -440,7 +440,7 @@ epollfd = epoll_create(1024);
 
 
 
-log_error(LOG_LEVEL_GPC, "before epoll_wait epollfd == %d", epollfd);
+log_error(LOG_LEVEL_GPC, "line: 443  before epoll_wait epollfd == %d", epollfd);
 
 
 
@@ -449,7 +449,6 @@ log_error(LOG_LEVEL_GPC, "before epoll_wait epollfd == %d", epollfd);
 	if( epoll_wait(epollfd, events, 1024, 30) <= 0)
    {
       log_error(LOG_LEVEL_GPC, "in epoll_wait epollfd == %d", epollfd);
-      close_socket(fd);
       return(JB_INVALID_SOCKET);
    }
 log_error(LOG_LEVEL_GPC, "after epoll_wait epollfd == %d", epollfd);
