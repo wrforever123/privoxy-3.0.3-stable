@@ -422,14 +422,14 @@ log_error(LOG_LEVEL_GPC, "fd == %d", fd);
  
 
  
-epollfd = epoll_create(1024);
+ epollfd = epoll_create(1024);
  
  ev.data.fd = fd;
- ev.events = EPOLLIN;
+ ev.events = EPOLLIN |EPOLLOUT;
  int epollctl_value = epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
  
  
- log_error(LOG_LEVEL_GPC, "line: 432  epollctl_value == %d", epollctl_value);
+ log_error(LOG_LEVEL_GPC, "epollctl_value == %d", epollctl_value);
  
 
 
@@ -440,15 +440,16 @@ epollfd = epoll_create(1024);
 
 
 
-log_error(LOG_LEVEL_GPC, "line: 443  before epoll_wait epollfd == %d", epollfd);
+log_error(LOG_LEVEL_GPC, "before epoll_wait epollfd == %d", epollfd);
 
 
 
    /* MS Windows uses int, not SOCKET, for the 1st arg of select(). Wierd! */
 //   if (select((int)fd + 1, NULL, &wfds, NULL, tv) <= 0)
-	if( epoll_wait(epollfd, events, 1024, 30) <= 0)
+	if( epoll_wait(epollfd, events, 1024, -1) <= 0)
    {
       log_error(LOG_LEVEL_GPC, "in epoll_wait epollfd == %d", epollfd);
+      close_socket(fd);
       return(JB_INVALID_SOCKET);
    }
 log_error(LOG_LEVEL_GPC, "after epoll_wait epollfd == %d", epollfd);

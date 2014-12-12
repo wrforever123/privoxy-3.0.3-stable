@@ -1,46 +1,20 @@
-Dec 10 14:09:53 Privoxy(-1218550080) Info: Privoxy version 3.0.3
-Dec 10 14:09:53 Privoxy(-1218550080) Info: Program name: ./privoxy
-Dec 10 14:09:53 Privoxy(-1218550080) Info: Listening on port 8118 for local connections only
-Dec 10 14:09:57 Privoxy(-1218606272) Request: in chat
-Dec 10 14:09:57 Privoxy(-1218606272) Request: ubuntu  read_socket
-Dec 10 14:09:57 Privoxy(-1218606272) Request: fhr.data.mozilla.com:443/ 12345
-Dec 10 14:09:57 Privoxy(-1218606272) Request: fhr.data.mozilla.com:443/ 1111
-Dec 10 14:09:57 Privoxy(-1218606272) Request: in connect
-Dec 10 14:09:57 Privoxy(-1218606272) Request: host == fhr.data.mozilla.com  port == 443
-Dec 10 14:09:57 Privoxy(-1218606272) Request: fd == 6
-Dec 10 14:09:57 Privoxy(-1218606272) Request: line: 432  epollctl_value == 0
-Dec 10 14:09:57 Privoxy(-1218606272) Request: line: 443  before epoll_wait epollfd == 7
-Dec 10 14:09:57 Privoxy(-1218606272) Request: in epoll_wait epollfd == 7
-Dec 10 14:09:57 Privoxy(-1218606272) Request: fhr.data.mozilla.com:443/ 22222
-Dec 10 14:09:57 Privoxy(-1218606272) Request: fhr.data.mozilla.com:443/ 333333
-Dec 10 14:09:57 Privoxy(-1218606272) Request: fhr.data.mozilla.com:443/ 4444
-Dec 10 14:09:59 Privoxy(-1218606272) Request: in chat
-Dec 10 14:09:59 Privoxy(-1218606272) Request: ubuntu  read_socket
-Dec 10 14:09:59 Privoxy(-1218606272) Request: www.baidu.com/ 12345
-Dec 10 14:09:59 Privoxy(-1218606272) Request: www.baidu.com/ 1111
-Dec 10 14:09:59 Privoxy(-1218606272) Request: in connect
-Dec 10 14:10:00 Privoxy(-1218606272) Request: host == www.baidu.com  port == 80
-Dec 10 14:10:00 Privoxy(-1218606272) Request: fd == 8
-Dec 10 14:10:00 Privoxy(-1218606272) Request: line: 432  epollctl_value == 0
-Dec 10 14:10:00 Privoxy(-1218606272) Request: line: 443  before epoll_wait epollfd == 9
-Dec 10 14:10:00 Privoxy(-1218606272) Request: in epoll_wait epollfd == 9
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/ 22222
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/ 333333
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/ 4444
-Dec 10 14:10:00 Privoxy(-1218606272) Request: in chat
-Dec 10 14:10:00 Privoxy(-1218606272) Request: ubuntu  read_socket
-Dec 10 14:10:00 Privoxy(-1218606272) Request: config.privoxy.org/send-stylesheet cgi call
-Dec 10 14:10:00 Privoxy(-1218606272) Request: config.privoxy.org/send-stylesheet crunch!
-Dec 10 14:10:00 Privoxy(-1218606272) Request: in chat
-Dec 10 14:10:00 Privoxy(-1218606272) Request: ubuntu  read_socket
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/favicon.ico 12345
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/favicon.ico 1111
-Dec 10 14:10:00 Privoxy(-1218606272) Request: in connect
-Dec 10 14:10:00 Privoxy(-1218606272) Request: host == www.baidu.com  port == 80
-Dec 10 14:10:00 Privoxy(-1218606272) Request: fd == 10
-Dec 10 14:10:00 Privoxy(-1218606272) Request: line: 432  epollctl_value == 0
-Dec 10 14:10:00 Privoxy(-1218606272) Request: line: 443  before epoll_wait epollfd == 11
-Dec 10 14:10:00 Privoxy(-1218606272) Request: in epoll_wait epollfd == 11
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/favicon.ico 22222
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/favicon.ico 333333
-Dec 10 14:10:00 Privoxy(-1218606272) Request: www.baidu.com/favicon.ico 4444
+Dec 12 16:00:59 Privoxy(-1218713920) Info: Privoxy version 3.0.3
+Dec 12 16:00:59 Privoxy(-1218713920) Info: Program name: ./privoxy
+Dec 12 16:00:59 Privoxy(-1218713920) Info: Listening on port 8118 for local connections only
+Dec 12 16:01:07 Privoxy(-1218770112) Request: in chat
+Dec 12 16:01:07 Privoxy(-1218770112) Request: ubuntu  read_socket
+Dec 12 16:01:07 Privoxy(-1218770112) Request: www.baidu.com/ 12345
+Dec 12 16:01:07 Privoxy(-1218770112) Request: www.baidu.com/ 1111
+Dec 12 16:01:07 Privoxy(-1218770112) Request: in connect
+Dec 12 16:01:08 Privoxy(-1218770112) Request: host == www.baidu.com  port == 80
+Dec 12 16:01:08 Privoxy(-1218770112) Request: fd == 6
+Dec 12 16:01:08 Privoxy(-1218770112) Request: epollctl_value == 0
+Dec 12 16:01:08 Privoxy(-1218770112) Request: before epoll_wait epollfd == 7
+Dec 12 16:01:08 Privoxy(-1218770112) Request: after epoll_wait epollfd == 7
+Dec 12 16:01:08 Privoxy(-1218770112) Request: out connect
+Dec 12 16:01:08 Privoxy(-1218770112) Request: www.baidu.com/ 22222
+Dec 12 16:01:08 Privoxy(-1218770112) Request: in chat  before for
+Dec 12 16:01:08 Privoxy(-1218770112) Request: after epoll_wait  2 
+Dec 12 16:01:08 Privoxy(-1218770112) Request: in  csp->cfd == 4 
+Dec 12 16:01:08 Privoxy(-1218770112) Request: in  csp->cfd == 5000 
+Dec 12 16:01:08 Privoxy(-1218770112) Request: ubuntu  read_socket
