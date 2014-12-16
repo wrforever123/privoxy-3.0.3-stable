@@ -1336,11 +1336,11 @@ log_error(LOG_LEVEL_GPC, "%s%s 333333", http->hostport, http->path);
 	//FD_SET(csp->cfd, &rfds);
    //   FD_SET(csp->sfd, &rfds);
    ev1.data.fd = csp->cfd;
-   ev1.events = EPOLLIN |EPOLLOUT;
+   ev1.events = EPOLLIN;
    epoll_ctl(epollfd, EPOLL_CTL_ADD, csp->cfd, &ev1); //错误处理未完成
    
    ev2.data.fd = csp->sfd;
-   ev2.events = EPOLLOUT | EPOLLIN;
+   ev2.events = EPOLLIN ;
    epoll_ctl(epollfd, EPOLL_CTL_ADD, csp->sfd, &ev2); //错误处理未完成
    
    

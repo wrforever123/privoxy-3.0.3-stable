@@ -425,7 +425,7 @@ log_error(LOG_LEVEL_GPC, "fd == %d", fd);
  epollfd = epoll_create(1024);
  
  ev.data.fd = fd;
- ev.events = EPOLLIN |EPOLLOUT;
+ ev.events = EPOLLOUT;
  int epollctl_value = epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
  
  
